@@ -1,0 +1,5 @@
+{
+  "name": "HUST Exam Portal",
+  "description": "Hệ thống thi trắc nghiệm và tự luận trực tuyến",
+  "requestFramePermissions": ["camera"]
+}
