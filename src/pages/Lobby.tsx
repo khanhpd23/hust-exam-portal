@@ -30,52 +30,68 @@ export default function Lobby() {
   const navigate = useNavigate();
   const exam = EXAMS_DATA[examId || ''] || EXAMS_DATA['ed3280-mid'];
   
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoNode, setVideoNode] = useState<HTMLVideoElement | null>(null);
   const [countdown, setCountdown] = useState(10);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const startCamera = async () => {
-    setCameraError(null);
-    setIsRetrying(true);
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("Trình duyệt không hỗ trợ API Camera.");
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(e => console.error("Error playing video:", e));
+  useEffect(() => {
+    if (!videoNode) return;
+
+    let mediaStream: MediaStream | null = null;
+    let isMounted = true;
+
+    const startCamera = async () => {
+      setCameraError(null);
+      setIsRetrying(true);
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("Trình duyệt không hỗ trợ API Camera.");
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        
+        if (!isMounted) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        mediaStream = stream;
+        videoNode.srcObject = stream;
+        videoNode.onloadedmetadata = () => {
+          videoNode.play().catch(e => console.error("Error playing video:", e));
         };
         setCameraActive(true);
+      } catch (err: any) {
+        if (!isMounted) return;
+        console.error("Error accessing camera:", err);
+        setCameraActive(false);
+        if (err.name === 'NotAllowedError') {
+          setCameraError("Vui lòng cấp quyền truy cập Camera trong trình duyệt.");
+        } else if (err.name === 'NotFoundError') {
+          setCameraError("Không tìm thấy thiết bị Camera nào.");
+        } else {
+          setCameraError(err.message || "Lỗi không xác định khi truy cập Camera.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsRetrying(false);
+        }
       }
-    } catch (err: any) {
-      console.error("Error accessing camera:", err);
-      setCameraActive(false);
-      if (err.name === 'NotAllowedError') {
-        setCameraError("Vui lòng cấp quyền truy cập Camera trong trình duyệt.");
-      } else if (err.name === 'NotFoundError') {
-        setCameraError("Không tìm thấy thiết bị Camera nào.");
-      } else {
-        setCameraError(err.message || "Lỗi không xác định khi truy cập Camera.");
-      }
-    } finally {
-      setIsRetrying(false);
-    }
-  };
+    };
 
-  useEffect(() => {
     startCamera();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      isMounted = false;
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      if (videoNode.srcObject) {
+        videoNode.srcObject = null;
       }
     };
-  }, []);
+  }, [videoNode]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -148,7 +164,7 @@ export default function Lobby() {
           <div className="lg:col-span-5 space-y-6">
             <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden ring-4 ring-gray-100 shadow-lg">
               <video 
-                ref={videoRef} 
+                ref={setVideoNode} 
                 autoPlay 
                 playsInline 
                 muted 
