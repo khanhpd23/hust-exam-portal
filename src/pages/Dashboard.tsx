@@ -100,8 +100,8 @@ export default function Dashboard() {
                 <div className="space-y-2.5 text-sm text-gray-600 font-medium mb-6">
                   <p className="flex items-center gap-2.5"><Calendar className="w-4 h-4 text-gray-400" /> Ngày thi: {exam.date}</p>
                   <p className="flex items-center gap-2.5"><ListChecks className="w-4 h-4 text-gray-400" /> Hình thức: {exam.format}</p>
-                  <p className="flex items-center gap-2.5"><Clock className="w-4 h-4 text-gray-400" /> {exam.duration} phút</p>
-                  <p className="flex items-center gap-2.5"><Lock className="w-4 h-4 text-gray-400" /> Giám sát AI (Proctored)</p>
+                  <p className="flex items-center gap-2.5"><Clock className="w-4 h-4 text-gray-400" /> {exam.duration / 60} phút</p>
+                  <p className="flex items-center gap-2.5"><Lock className="w-4 h-4 text-gray-400" /> Giám sát AI</p>
                 </div>
                 <Button
                   className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl"
@@ -134,8 +134,8 @@ export default function Dashboard() {
                 <div className="space-y-2.5 text-sm text-gray-600 font-medium mb-6">
                   <p className="flex items-center gap-2.5"><Calendar className="w-4 h-4 text-gray-400" /> Ngày thi: {exam.date}</p>
                   <p className="flex items-center gap-2.5"><ListChecks className="w-4 h-4 text-gray-400" /> Hình thức: {exam.format}</p>
-                  <p className="flex items-center gap-2.5"><Clock className="w-4 h-4 text-gray-400" /> {exam.duration} phút</p>
-                  <p className="flex items-center gap-2.5"><Lock className="w-4 h-4 text-gray-400" /> Giám sát AI (Proctored)</p>
+                  <p className="flex items-center gap-2.5"><Clock className="w-4 h-4 text-gray-400" /> {exam.duration / 60} phút</p>
+                  <p className="flex items-center gap-2.5"><Lock className="w-4 h-4 text-gray-400" /> Giám sát AI</p>
                 </div>
                 <Button
                   disabled
