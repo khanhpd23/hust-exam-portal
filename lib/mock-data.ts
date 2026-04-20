@@ -5,13 +5,13 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Giữa Kỳ',
     format: 'Trắc nghiệm',
     date: '15/04/2026',
-    duration: 60, // 1 minute
+    duration: 300, // 1 minute
     status: 'ongoing',
     questions: Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       type: 'mcq',
-      text: i === 0 
-        ? "Theo phân tâm học của Sigmund Freud, cấu trúc nhân cách bao gồm những thành phần nào?" 
+      text: i === 0
+        ? "Theo phân tâm học của Sigmund Freud, cấu trúc nhân cách bao gồm những thành phần nào?"
         : `Câu hỏi trắc nghiệm số ${i + 1} về Tâm lý học ứng dụng. Chọn đáp án đúng nhất dưới đây.`,
       options: [
         "Cái Nó (Id), Cái Tôi (Ego), Cái Siêu Tôi (Superego)",
@@ -27,7 +27,7 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Cuối Kỳ',
     format: 'Trắc nghiệm & Tự luận',
     date: '20/05/2026',
-    duration: 60,
+    duration: 300,
     status: 'ongoing',
     questions: [
       ...Array.from({ length: 10 }, (_, i) => ({
@@ -54,7 +54,7 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Cuối Kỳ',
     format: 'Tự luận',
     date: '22/05/2026',
-    duration: 60,
+    duration: 300,
     status: 'ongoing',
     questions: [
       {
@@ -62,6 +62,7 @@ export const EXAMS_DATA: Record<string, any> = {
         type: 'essay',
         text: 'Câu 1 (4 điểm): Phân tích vai trò của động cơ học tập đối với kết quả học tập của học sinh. Làm thế nào để giáo viên có thể kích thích và duy trì động cơ học tập tích cực?'
       },
+
       {
         id: 2,
         type: 'essay',
@@ -74,31 +75,31 @@ export const EXAMS_DATA: Record<string, any> = {
       }
     ]
   },
-  'ed2120-mid': {
-    id: 'ed2120-mid',
+'ed2120-mid': {
+  id: 'ed2120-mid',
     title: 'ED2120 - Thiết kế UI/UX',
-    type: 'Thi Giữa Kỳ',
-    format: 'Thực hành & Trắc nghiệm',
-    date: '30/04/2026',
-    duration: 90,
-    status: 'upcoming',
-    questions: []
-  }
+      type: 'Thi Giữa Kỳ',
+        format: 'Thực hành & Trắc nghiệm',
+          date: '30/05/2026',
+            duration: 300,
+              status: 'upcoming',
+                questions: []
+}
 };
 
 export const HISTORY_DATA = [
-  { id: 'h1', title: 'MI1111 - Giải tích 1', type: 'Thi Cuối Kỳ', date: '10/01/2026', score: 8.5, status: 'Đã hoàn thành' },
-  { id: 'h2', title: 'PH1110 - Vật lý đại cương 1', type: 'Thi Cuối Kỳ', date: '15/01/2026', score: 7.0, status: 'Đã hoàn thành' },
-  { id: 'h3', title: 'IT1110 - Tin học đại cương', type: 'Thi Giữa Kỳ', date: '20/11/2025', score: 9.0, status: 'Đã hoàn thành' },
+  { id: 'h1', title: 'Tâm lý học giáo dục', type: 'Thi cuối kỳ 1', date: '31/01/2026', score: 8, status: 'Đã hoàn thành' },
+  { id: 'h2', title: 'Tâm lý học ứng dụng', type: 'Thi cuối kỳ 1', date: '15/01/2026', score: 9, status: 'Đã hoàn thành' },
+  { id: 'h3', title: 'Tâm lý học ứng dụng', type: 'Thi giữa kỳ 1', date: '20/11/2025', score: 9.5, status: 'Đã hoàn thành' },
 ];
 
 export const GRADES_DATA = [
-  { id: 'g1', subject: 'MI1111 - Giải tích 1', credits: 3, midterm: 8.0, final: 9.0, total: 8.5, letter: 'A' },
-  { id: 'g2', subject: 'PH1110 - Vật lý đại cương 1', credits: 3, midterm: 7.5, final: 6.5, total: 7.0, letter: 'B' },
-  { id: 'g3', subject: 'IT1110 - Tin học đại cương', credits: 4, midterm: 9.0, final: 9.0, total: 9.0, letter: 'A+' },
+  { id: 'g1', subject: 'Tâm lý học giáo dục', credits: 3, midterm: 10.0, final: 8.0, total: 8.5, letter: 'A' },
+  { id: 'g2', subject: 'Tâm lý học ứng dụng', credits: 2, midterm: 10, final: 9.5, total: 10, letter: 'A+' },
+  { id: 'g3', subject: 'E-learning', credits: 3, midterm: 9.0, final: 9.0, total: 9.0, letter: 'A' },
 ];
 
 export const APPEALS_DATA = [
-  { id: 'a1', subject: 'PH1110 - Vật lý đại cương 1', type: 'Thi Cuối Kỳ', date: '20/01/2026', status: 'Đang xử lý', reason: 'Chấm sót câu 3 phần tự luận' },
-  { id: 'a2', subject: 'MI1111 - Giải tích 1', type: 'Thi Giữa Kỳ', date: '05/12/2025', status: 'Đã từ chối', reason: 'Cộng nhầm điểm thành phần' }
+  { id: 'a1', subject: 'Tâm lý học giáo dục', type: 'Thi cuối kỳ', date: '31/01/2026', status: 'Đang xử lý', reason: 'Chấm sót câu 3 phần tự luận.' },
+  { id: 'a2', subject: 'E-learning', type: 'Thi giữa kỳ', date: '15/01/2026', status: 'Đã từ chối', reason: 'Điểm tổng không thay đổi.' }
 ];
