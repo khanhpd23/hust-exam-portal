@@ -126,7 +126,7 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
         onMouseUp={handleMouseUp}
         className="p-6 flex-1 outline-none overflow-y-auto prose max-w-none text-gray-800 leading-relaxed"
         style={{ minHeight: '300px' }}
-        placeholder="Nhập câu trả lời của bạn vào đây..."
+        data-placeholder="Nhập câu trả lời của bạn vào đây..."
       />
       <div className="bg-gray-50 border-t border-gray-200 p-3 px-5 text-xs font-bold text-gray-500 flex justify-between items-center">
         <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> Trình soạn thảo văn bản</span>
