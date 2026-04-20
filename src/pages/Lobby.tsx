@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Video, Wifi, ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,9 +103,18 @@ export default function Lobby() {
   return (
     <PageTransition skeleton={<LobbySkeleton />}>
       <div className="p-6 md:p-10 max-w-6xl mx-auto w-full">
-        <Button variant="ghost" className="mb-6 -ml-4 text-gray-500" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại Dashboard
-        </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-gray-100 gap-4">
+          <Link to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
+            <img src="/images/logo.png" alt="HUST Logo" className="w-10 h-14 mr-3 object-contain" />
+            <div className="flex flex-col text-left">
+              <span className="font-medium text-[10px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
+              <span className="font-bold text-[10px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
+            </div>
+          </Link>
+          <Button variant="ghost" className="text-gray-500 h-10 px-4" onClick={() => navigate('/dashboard')}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại Dashboard
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-6">

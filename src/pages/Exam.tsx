@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -118,9 +118,9 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
         <button onClick={() => format('insertUnorderedList')} className={`p-2 rounded transition-colors ${activeFormats.insertUnorderedList ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Danh sách không thứ tự"><List className="w-4 h-4" /></button>
         <button onClick={() => format('insertOrderedList')} className={`p-2 rounded transition-colors ${activeFormats.insertOrderedList ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Danh sách có thứ tự"><ListOrdered className="w-4 h-4" /></button>
       </div>
-      <div 
+      <div
         ref={editorRef}
-        contentEditable 
+        contentEditable
         onInput={handleInput}
         onKeyUp={handleKeyUp}
         onMouseUp={handleMouseUp}
@@ -183,7 +183,7 @@ export default function Exam() {
 
   const handleAnswer = (qId: number, value: any) => {
     setAnswers(prev => ({ ...prev, [qId]: value }));
-    
+
     // Simulate auto-saving
     setIsSaving(true);
     const saveDelay = exam.questions.find((q: any) => q.id === qId)?.type === 'essay' ? 1500 : 500;
@@ -214,10 +214,19 @@ export default function Exam() {
       <div className="h-screen flex flex-col bg-[#f8f9fa] overflow-hidden selection:bg-red-100 selection:text-red-900">
         {/* Exam Header */}
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shrink-0 z-10">
-          <div className="flex items-center gap-4">
-            <span className="font-bold text-[#a70015]">{exam.title}</span>
-            <div className="h-4 w-px bg-gray-300"></div>
-            <span className="text-sm font-medium text-gray-500">{exam.type}</span>
+          <div className="flex items-center gap-6">
+            <Link to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
+              <img src="/images/logo.png" alt="HUST" className="w-8 h-12 mr-3 object-contain" />
+              <div className="flex flex-col text-left">
+                <span className="font-medium text-[8px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
+                <span className="font-bold text-[8px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
+              </div>
+            </Link>
+            <div className="h-8 w-px bg-gray-200"></div>
+            <div className="flex flex-col">
+              <span className="font-bold text-[#a70015] leading-tight">{exam.title}</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{exam.type}</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className={`flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${isSaving ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
@@ -243,9 +252,9 @@ export default function Exam() {
                   const isAnswered = isQuestionAnswered(mq.id);
                   const isFlagged = flagged[mq.id];
                   const isActive = currentQuestionIdx === idx;
-                  
+
                   let btnClass = "w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all border-2 relative ";
-                  
+
                   if (isActive) btnClass += "border-[#a70015] bg-red-50 text-[#a70015] scale-110 shadow-sm z-10";
                   else if (isFlagged) btnClass += "border-amber-400 bg-amber-50 text-amber-700";
                   else if (isAnswered) btnClass += "border-transparent bg-gray-800 text-white";
@@ -275,7 +284,7 @@ export default function Exam() {
                 <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">
                   {q.type === 'essay' ? 'Phần Tự Luận' : 'Phần Trắc Nghiệm'} - Câu {q.id}
                 </span>
-                <Button 
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={() => toggleFlag(q.id)}
@@ -295,18 +304,17 @@ export default function Exam() {
                   {q.options.map((opt: string, oIdx: number) => {
                     const isSelected = answers[q.id] === oIdx;
                     return (
-                      <label 
-                        key={oIdx} 
-                        className={`flex items-start p-5 rounded-xl cursor-pointer transition-all border-2 ${
-                          isSelected 
-                            ? 'border-[#a70015] bg-red-50/50' 
-                            : 'border-transparent bg-white shadow-sm hover:border-gray-200 hover:bg-gray-50'
-                        }`}
+                      <label
+                        key={oIdx}
+                        className={`flex items-start p-5 rounded-xl cursor-pointer transition-all border-2 ${isSelected
+                          ? 'border-[#a70015] bg-red-50/50'
+                          : 'border-transparent bg-white shadow-sm hover:border-gray-200 hover:bg-gray-50'
+                          }`}
                       >
-                        <input 
-                          type="radio" 
-                          name={`question-${q.id}`} 
-                          className="hidden" 
+                        <input
+                          type="radio"
+                          name={`question-${q.id}`}
+                          className="hidden"
                           checked={isSelected}
                           onChange={() => handleAnswer(q.id, oIdx)}
                         />
@@ -322,24 +330,24 @@ export default function Exam() {
                 </div>
               ) : (
                 <div className="mt-6">
-                  <RichTextEditor 
+                  <RichTextEditor
                     id={q.id}
-                    value={answers[q.id] || ''} 
-                    onChange={(val) => handleAnswer(q.id, val)} 
+                    value={answers[q.id] || ''}
+                    onChange={(val) => handleAnswer(q.id, val)}
                   />
                 </div>
               )}
 
               <div className="mt-16 flex justify-between items-center pt-8 border-t border-gray-200">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentQuestionIdx(prev => Math.max(0, prev - 1))}
                   disabled={currentQuestionIdx === 0}
                   className="rounded-xl"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" /> Câu trước
                 </Button>
-                <Button 
+                <Button
                   onClick={() => setCurrentQuestionIdx(prev => Math.min(exam.questions.length - 1, prev + 1))}
                   disabled={currentQuestionIdx === exam.questions.length - 1}
                   className="rounded-xl bg-gray-900 text-white hover:bg-gray-800"
@@ -360,8 +368,8 @@ export default function Exam() {
             </div>
 
             <div className="mt-auto">
-              <Button 
-                className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20" 
+              <Button
+                className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
                 onClick={() => setShowSubmitModal(true)}
               >
                 Nộp bài <Send className="w-5 h-5 ml-2" />
@@ -403,15 +411,15 @@ export default function Exam() {
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-col gap-3">
-                  <Button 
-                    onClick={handleFinalSubmit} 
+                  <Button
+                    onClick={handleFinalSubmit}
                     className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl"
                   >
                     Xác nhận nộp bài
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowSubmitModal(false)} 
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSubmitModal(false)}
                     className="w-full py-6 rounded-xl"
                   >
                     Quay lại làm tiếp
