@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough } from 'lucide-react';
+import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough, Eye, EyeOff, VideoOff, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EXAMS_DATA } from '@/lib/mock-data';
 import PageTransition from '@/components/PageTransition';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 function ExamSkeleton() {
   return (
@@ -148,6 +149,37 @@ export default function Exam() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTimerVisible, setIsTimerVisible] = useState(true);
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [videoNode, setVideoNode] = useState<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!isCameraVisible || !videoNode) return;
+
+    let mediaStream: MediaStream | null = null;
+    let isMounted = true;
+
+    navigator.mediaDevices?.getUserMedia({ video: true })
+      .then(stream => {
+        if (!isMounted) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        mediaStream = stream;
+        videoNode.srcObject = stream;
+        videoNode.play().catch(console.error);
+      })
+      .catch(err => {
+        if (!isMounted) return;
+        toast.error('Lỗi Camera', { description: 'Không thể truy cập camera giám sát.' });
+      });
+
+    return () => {
+      isMounted = false;
+      if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+      if (videoNode.srcObject) videoNode.srcObject = null;
+    };
+  }, [isCameraVisible, videoNode]);
 
   useEffect(() => {
     if (timeLeft > 0 && !isSubmitting) {
@@ -159,7 +191,12 @@ export default function Exam() {
   }, [timeLeft, isSubmitting]);
 
   useEffect(() => {
-    if (timeLeft === 45 && !isSubmitting) {
+    if (timeLeft === 60 && !isSubmitting) {
+      toast.error('Cảnh báo thời gian', {
+        description: 'Thời gian làm bài còn lại ít hơn 1 phút!',
+        duration: 7000,
+        position: 'top-center'
+      });
       const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
       audio.play().catch(e => console.log('Audio play failed', e));
     }
@@ -215,13 +252,6 @@ export default function Exam() {
         {/* Exam Header */}
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shrink-0 z-10">
           <div className="flex items-center gap-6">
-            <Link to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
-              <img src="/images/logo.png" alt="HUST" className="w-8 h-12 mr-3 object-contain" />
-              <div className="flex flex-col text-left">
-                <span className="font-medium text-[8px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
-                <span className="font-bold text-[8px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
-              </div>
-            </Link>
             <div className="h-8 w-px bg-gray-200"></div>
             <div className="flex flex-col">
               <span className="font-bold text-[#a70015] leading-tight">{exam.title}</span>
@@ -240,45 +270,62 @@ export default function Exam() {
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar: Navigator */}
-          <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 min-h-0">
-            <div className="p-6 border-b border-gray-100 shrink-0">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Question Navigator</h3>
-              <p className="text-sm font-medium text-gray-600">Đã làm: {Object.keys(answers).filter(k => isQuestionAnswered(Number(k))).length}/{exam.questions.length}</p>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="grid grid-cols-5 gap-2">
-                {exam.questions.map((mq: any, idx: number) => {
-                  const isAnswered = isQuestionAnswered(mq.id);
-                  const isFlagged = flagged[mq.id];
-                  const isActive = currentQuestionIdx === idx;
-
-                  let btnClass = "w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all border-2 relative ";
-
-                  if (isActive) btnClass += "border-[#a70015] bg-red-50 text-[#a70015] scale-110 shadow-sm z-10";
-                  else if (isFlagged) btnClass += "border-amber-400 bg-amber-50 text-amber-700";
-                  else if (isAnswered) btnClass += "border-transparent bg-gray-800 text-white";
-                  else btnClass += "border-gray-200 bg-white text-gray-500 hover:border-gray-300";
-
-                  return (
-                    <button key={mq.id} onClick={() => setCurrentQuestionIdx(idx)} className={btnClass} title={mq.type === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}>
-                      {mq.id}
-                      {mq.type === 'essay' && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>}
-                    </button>
-                  );
-                })}
+          {/* Left Sidebar: Info & Camera */}
+          <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 min-h-0 overflow-y-auto p-6 space-y-6">
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thông tin bài thi</h3>
+              <h2 className="text-xl font-bold text-gray-900 leading-tight mb-2">{exam.title}</h2>
+              <p className="text-sm font-bold text-[#a70015]">{exam.type}</p>
+              <div className="mt-4 space-y-2 text-sm text-gray-600 font-medium">
+                <p>• {exam.format}</p>
+                <p>• Thời gian: {exam.duration / 60} phút</p>
+                <p className="text-amber-600 font-bold">• Có giám sát AI</p>
               </div>
             </div>
-            <div className="p-6 bg-gray-50 border-t border-gray-200 space-y-2 text-xs font-medium text-gray-600 shrink-0">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-800 rounded-sm"></div> Đã trả lời</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-white border-2 border-gray-200 rounded-sm"></div> Chưa trả lời</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border-2 border-amber-400 rounded-sm"></div> Đánh dấu xem lại</div>
-              <div className="flex items-center gap-2 mt-4 pt-2 border-t border-gray-200"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Câu hỏi tự luận</div>
+
+            <div className="pt-6 border-t border-gray-100">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Camera Giám Sát</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-gray-500 hover:text-gray-900"
+                  onClick={() => setIsCameraVisible(!isCameraVisible)}
+                  title={isCameraVisible ? "Ẩn camera giám sát" : "Hiện camera giám sát"}
+                >
+                  {isCameraVisible ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
+                  {isCameraVisible ? "Ẩn" : "Hiện"}
+                </Button>
+              </div>
+
+              {isCameraVisible ? (
+                <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-inner ring-2 ring-gray-200">
+                  <video
+                    ref={setVideoNode}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="absolute inset-0 w-full h-full object-cover transform -scale-x-100"
+                  />
+                  <div className="absolute inset-0 border-[4px] border-white/5 flex items-center justify-center pointer-events-none">
+                    <div className="w-16 h-16 border border-dashed border-green-400/50 rounded-full"></div>
+                  </div>
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    Đang ghi hình
+                  </div>
+                </div>
+              ) : (
+                <div className="aspect-video bg-gray-50 rounded-xl flex flex-col items-center justify-center text-gray-400 border border-gray-200">
+                  <VideoOff className="w-8 h-8 mb-2 opacity-30" />
+                  <span className="text-xs font-semibold">Camera đang ẩn</span>
+                </div>
+              )}
             </div>
           </aside>
 
           {/* Center: Question Area */}
-          <main className="flex-1 overflow-y-auto p-8 md:p-12 relative">
+          <main className="flex-1 overflow-y-auto p-8 md:p-12 relative bg-white">
             <div className="max-w-4xl mx-auto">
               <div className="flex justify-between items-center mb-8">
                 <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">
@@ -308,7 +355,7 @@ export default function Exam() {
                         key={oIdx}
                         className={`flex items-start p-5 rounded-xl cursor-pointer transition-all border-2 ${isSelected
                           ? 'border-[#a70015] bg-red-50/50'
-                          : 'border-transparent bg-white shadow-sm hover:border-gray-200 hover:bg-gray-50'
+                          : 'border-transparent bg-gray-50 shadow-sm hover:border-gray-200 hover:bg-gray-100'
                           }`}
                       >
                         <input
@@ -318,7 +365,7 @@ export default function Exam() {
                           checked={isSelected}
                           onChange={() => handleAnswer(q.id, oIdx)}
                         />
-                        <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-4 ${isSelected ? 'border-[#a70015]' : 'border-gray-300'}`}>
+                        <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-4 transition-colors ${isSelected ? 'border-[#a70015]' : 'border-gray-300 bg-white'}`}>
                           {isSelected && <div className="w-2.5 h-2.5 bg-[#a70015] rounded-full"></div>}
                         </div>
                         <span className={`text-lg ${isSelected ? 'font-semibold text-[#a70015]' : 'text-gray-700'}`}>
@@ -358,16 +405,63 @@ export default function Exam() {
             </div>
           </main>
 
-          {/* Right Sidebar: Timer & Submit */}
-          <aside className="w-72 bg-gray-50 border-l border-gray-200 flex flex-col shrink-0 p-6">
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 text-center shadow-sm border border-white mb-8">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thời gian còn lại</p>
-              <div className={`text-4xl font-black tabular-nums tracking-tight ${timeLeft < 300 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'}`}>
-                {formatTime(timeLeft)}
+          {/* Right Sidebar: Navigator, Timer & Submit */}
+          <aside className="w-80 bg-gray-50 border-l border-gray-200 flex flex-col shrink-0 min-h-0">
+            <div className="p-5 border-b border-gray-200 shrink-0 bg-white">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Bảng câu hỏi</h3>
+              <p className="text-sm font-medium text-gray-600">
+                Đã làm: <span className="font-bold text-[#a70015]">{Object.keys(answers).filter(k => isQuestionAnswered(Number(k))).length}</span>/{exam.questions.length}
+              </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5">
+              <div className="grid grid-cols-5 gap-2">
+                {exam.questions.map((mq: any, idx: number) => {
+                  const isAnswered = isQuestionAnswered(mq.id);
+                  const isFlagged = flagged[mq.id];
+                  const isActive = currentQuestionIdx === idx;
+
+                  let btnClass = "w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all border-2 relative ";
+
+                  if (isActive) btnClass += "border-[#a70015] bg-red-50 text-[#a70015] scale-110 shadow-sm z-10";
+                  else if (isFlagged) btnClass += "border-amber-400 bg-amber-50 text-amber-700";
+                  else if (isAnswered) btnClass += "border-transparent bg-gray-800 text-white";
+                  else btnClass += "border-gray-200 bg-white text-gray-500 hover:border-gray-300";
+
+                  return (
+                    <button key={mq.id} onClick={() => setCurrentQuestionIdx(idx)} className={btnClass} title={mq.type === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}>
+                      {mq.id}
+                      {mq.type === 'essay' && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 space-y-2 text-xs font-medium text-gray-600 shrink-0">
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-800 rounded-sm"></div> Đã trả lời</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-white border-2 border-gray-200 rounded-sm"></div> Chưa trả lời</div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border-2 border-amber-400 rounded-sm"></div> Đánh dấu xem lại</div>
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Câu hỏi tự luận</div>
               </div>
             </div>
 
-            <div className="mt-auto">
+            <div className="p-5 border-t border-gray-200 shrink-0 bg-white shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+              <div className="bg-gray-50 rounded-2xl p-4 text-center shadow-inner border border-gray-100 mb-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Thời gian còn lại</p>
+                <div className={`text-4xl font-black tabular-nums tracking-tight transition-opacity ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'} ${!isTimerVisible ? 'opacity-30' : ''}`}>
+                  {isTimerVisible ? formatTime(timeLeft) : '- - : - -'}
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => setIsTimerVisible(!isTimerVisible)}
+                className="w-full mb-4 rounded-xl text-gray-500 hover:text-gray-700 bg-white shadow-sm"
+              >
+                {isTimerVisible ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                {isTimerVisible ? "Ẩn đồng hồ đếm ngược" : "Hiện đồng hồ đếm ngược"}
+              </Button>
+
               <Button
                 className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
                 onClick={() => setShowSubmitModal(true)}
