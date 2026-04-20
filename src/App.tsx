@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
+import { Toaster } from '@/components/ui/sonner';
 import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -43,6 +44,7 @@ export default function App() {
   return (
     <Router>
       <AnimatedRoutes />
+      <Toaster position="top-center" richColors />
     </Router>
   );
 }
