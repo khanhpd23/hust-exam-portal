@@ -44,7 +44,7 @@ export default function Profile() {
           </div>
           <div className="text-center md:text-left space-y-2 mt-4 md:mt-0">
             <h2 className="text-3xl font-bold text-gray-900">Nguyễn Văn A</h2>
-            <p className="text-lg text-gray-500 font-medium">Sinh viên năm 3 • Viện Công nghệ Thông tin và Truyền thông</p>
+            <p className="text-lg text-gray-500 font-medium">Sinh viên năm 1 - Khoa Khoa học & Công nghệ giáo dục</p>
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-bold mt-2">
               Trạng thái: Đang học
             </div>
@@ -59,19 +59,19 @@ export default function Profile() {
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <User className="w-4 h-4" /> Mã số sinh viên
                 </label>
-                <p className="text-lg font-semibold text-gray-900">20210001</p>
+                <p className="text-lg font-semibold text-gray-900">202500001</p>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Mail className="w-4 h-4" /> Email trường
                 </label>
-                <p className="text-lg font-semibold text-gray-900">a.nv210001@sis.hust.edu.vn</p>
+                <p className="text-lg font-semibold text-gray-900">a.nv250001@sis.hust.edu.vn</p>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <BookOpen className="w-4 h-4" /> Chương trình đào tạo
                 </label>
-                <p className="text-lg font-semibold text-gray-900">Khoa học Máy tính 2021</p>
+                <p className="text-lg font-semibold text-gray-900">Công nghệ giáo dục 2025</p>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
