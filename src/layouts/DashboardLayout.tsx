@@ -62,7 +62,7 @@ export default function DashboardLayout() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold text-gray-900">Nguyễn Văn A</span>
-              <span className="text-xs text-gray-500">20210001</span>
+              <span className="text-xs text-gray-500">20250001</span>
             </div>
           </Link>
           <Button
