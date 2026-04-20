@@ -27,9 +27,9 @@ export default function DashboardLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex">
+    <div className="h-screen bg-gray-50/50 flex overflow-hidden">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex sticky top-0 h-screen">
         <div className="h-20 flex items-center px-4 border-b border-gray-200">
           <img src="/images/logo.png" alt="HUST Logo" className="w-10 h-14 mr-3 object-contain" />
           <div className="flex flex-col">
@@ -38,7 +38,7 @@ export default function DashboardLayout() {
           </div>
         </div>
         
-        <div className="flex-1 py-6 px-4 space-y-1">
+        <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard');
             return (
