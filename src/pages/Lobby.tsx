@@ -29,9 +29,9 @@ export default function Lobby() {
   const { examId } = useParams();
   const navigate = useNavigate();
   const exam = EXAMS_DATA[examId || ''] || EXAMS_DATA['ed3280-mid'];
-  
+
   const [videoNode, setVideoNode] = useState<HTMLVideoElement | null>(null);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(2);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -50,7 +50,7 @@ export default function Lobby() {
           throw new Error("Trình duyệt không hỗ trợ API Camera.");
         }
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        
+
         if (!isMounted) {
           stream.getTracks().forEach(track => track.stop());
           return;
@@ -105,7 +105,7 @@ export default function Lobby() {
       <div className="p-6 md:p-10 max-w-6xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-gray-100 gap-4">
           <Link to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
-            <img src="/images/logo.png" alt="HUST Logo" className="w-10 h-14 mr-3 object-contain" />
+            <img src="/images/logo.png" alt="HUST" className="w-10 h-14 mr-3 object-contain" />
             <div className="flex flex-col text-left">
               <span className="font-medium text-[10px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
               <span className="font-bold text-[10px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
@@ -172,11 +172,11 @@ export default function Lobby() {
 
           <div className="lg:col-span-5 space-y-6">
             <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden ring-4 ring-gray-100 shadow-lg">
-              <video 
-                ref={setVideoNode} 
-                autoPlay 
-                playsInline 
-                muted 
+              <video
+                ref={setVideoNode}
+                autoPlay
+                playsInline
+                muted
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 border-[10px] border-white/5 flex items-center justify-center z-20 pointer-events-none">
@@ -190,8 +190,8 @@ export default function Lobby() {
                 <div className="text-5xl font-black text-gray-900 mb-8 tabular-nums">
                   00:{countdown.toString().padStart(2, '0')}
                 </div>
-                <Button 
-                  className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed" 
+                <Button
+                  className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => navigate(`/exam/${exam.id}`)}
                   disabled={countdown > 0}
                 >
