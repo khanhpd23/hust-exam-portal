@@ -5,19 +5,19 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Giữa Kỳ',
     format: 'Trắc nghiệm',
     date: '15/04/2026',
-    duration: 300, // 1 minute
+    duration: 120, // 1 minute
     status: 'ongoing',
     questions: Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       type: 'mcq',
       text: i === 0
         ? "Theo phân tâm học của Sigmund Freud, cấu trúc nhân cách bao gồm những thành phần nào?"
-        : `Câu hỏi trắc nghiệm số ${i + 1} về Tâm lý học ứng dụng. Chọn đáp án đúng nhất dưới đây.`,
+        : `Câu ${i + 1}: Chọn đáp án đúng nhất dưới đây:`,
       options: [
-        "Cái Nó (Id), Cái Tôi (Ego), Cái Siêu Tôi (Superego)",
-        "Ý thức, Tiền ý thức, Vô thức",
-        "Hướng nội, Hướng ngoại",
-        "Nhu cầu sinh lý, Nhu cầu an toàn, Nhu cầu xã hội"
+        "Phương án 1",
+        "Phương án 2",
+        "Phương án 3",
+        "Phương án 4"
       ]
     }))
   },
@@ -27,13 +27,13 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Cuối Kỳ',
     format: 'Trắc nghiệm & Tự luận',
     date: '20/05/2026',
-    duration: 300,
+    duration: 120,
     status: 'ongoing',
     questions: [
       ...Array.from({ length: 10 }, (_, i) => ({
         id: i + 1,
         type: 'mcq',
-        text: `Câu hỏi trắc nghiệm số ${i + 1} về Tâm lý học ứng dụng. Chọn đáp án đúng nhất dưới đây.`,
+        text: `Câu ${i + 1}: Chọn đáp án đúng nhất dưới đây.`,
         options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"]
       })),
       {
@@ -54,7 +54,7 @@ export const EXAMS_DATA: Record<string, any> = {
     type: 'Thi Cuối Kỳ',
     format: 'Tự luận',
     date: '22/05/2026',
-    duration: 300,
+    duration: 120,
     status: 'ongoing',
     questions: [
       {
@@ -75,16 +75,16 @@ export const EXAMS_DATA: Record<string, any> = {
       }
     ]
   },
-'ed2120-mid': {
-  id: 'ed2120-mid',
+  'ed2120-mid': {
+    id: 'ed2120-mid',
     title: 'ED2120 - Thiết kế UI/UX',
-      type: 'Thi Giữa Kỳ',
-        format: 'Thực hành & Trắc nghiệm',
-          date: '30/05/2026',
-            duration: 300,
-              status: 'upcoming',
-                questions: []
-}
+    type: 'Thi Giữa Kỳ',
+    format: 'Thực hành & Trắc nghiệm',
+    date: '30/05/2026',
+    duration: 120,
+    status: 'upcoming',
+    questions: []
+  }
 };
 
 export const HISTORY_DATA = [
