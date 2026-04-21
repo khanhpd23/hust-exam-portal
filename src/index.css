@@ -126,6 +126,7 @@
     }
   html {
     @apply font-sans;
+    font-size: 17px;
     }
   
   .prose ul {
@@ -192,9 +193,44 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
 [contenteditable][data-placeholder]:empty:before {
   content: attr(data-placeholder);
   color: #94a3b8;
   pointer-events: none;
   display: block; /* For modern browsers */
+}
+
+/* Modern, minimalist global scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.4); /* Tailwind gray-400 with opacity */
+  border-radius: 9999px; /* Fully rounded */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.6); /* Tailwind gray-500 with opacity */
+}
+
+/* Firefox fallback */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
 }
