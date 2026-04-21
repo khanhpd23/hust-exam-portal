@@ -36,11 +36,15 @@ export default function SubmissionSuccess() {
   const navigate = useNavigate();
   const exam = EXAMS_DATA[examId || ''] || EXAMS_DATA['ed3280-mid'];
 
+  const toastFired = React.useRef(false);
   useEffect(() => {
-    toast.success('Dữ liệu bài thi đã được lưu trữ an toàn.');
+    if (!toastFired.current) {
+      toast.success('Dữ liệu bài thi đã được lưu trữ an toàn.');
+      toastFired.current = true;
+    }
   }, []);
 
-  const sessionToken = `SECURE-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  const sessionToken = (Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2)).toUpperCase();
   const now = new Date();
 
   return (
