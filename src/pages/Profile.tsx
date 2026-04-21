@@ -77,7 +77,7 @@ export default function Profile() {
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                   <Calendar className="w-4 h-4" /> Khóa học
                 </label>
-                <p className="text-lg font-semibold text-gray-900">K66</p>
+                <p className="text-lg font-semibold text-gray-900">K70</p>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
