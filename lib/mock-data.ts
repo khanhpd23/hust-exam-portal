@@ -79,7 +79,7 @@ export const EXAMS_DATA: Record<string, any> = {
     id: 'ed2120-mid',
     title: 'ED2120 - Thiết kế UI/UX',
     type: 'Thi Giữa Kỳ',
-    format: 'Thực hành & Trắc nghiệm',
+    format: 'Trắc nghiệm & Tự luận',
     date: '30/05/2026',
     duration: 120,
     status: 'upcoming',
