@@ -7,20 +7,20 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Lobby from './pages/Lobby';
 import Exam from './pages/Exam';
-import Receipt from './pages/Receipt';
 import History from './pages/History';
 import Grades from './pages/Grades';
 import Appeals from './pages/Appeals';
 import Profile from './pages/Profile';
+import SubmissionSuccess from './pages/SubmissionSuccess';
 
 function AnimatedRoutes() {
   const location = useLocation();
-  
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Login />} />
-        
+
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
@@ -32,8 +32,8 @@ function AnimatedRoutes() {
 
         <Route path="/lobby/:examId" element={<Lobby />} />
         <Route path="/exam/:examId" element={<Exam />} />
-        <Route path="/receipt/:examId" element={<Receipt />} />
-        
+        <Route path="/submission-success/:examId" element={<SubmissionSuccess />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
