@@ -63,11 +63,12 @@ function DashboardSkeleton() {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const ongoingExamsCount = Object.values(EXAMS_DATA).filter((e: any) => e.status === 'ongoing').length;
 
   return (
     <PageTransition skeleton={<DashboardSkeleton />}>
       <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
           <div>
             <span className="text-[#a70015] font-bold tracking-widest text-l mb-2 block">Xin chào, A!</span>
             <h1 className="text-4xl font-black text-gray-900 tracking-tight">Màn hình chính</h1>
@@ -181,6 +182,29 @@ export default function Dashboard() {
           </Dialog>
         </div>
 
+        {ongoingExamsCount > 0 && (
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/40 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div className="flex items-center gap-4 relative z-10 w-full sm:w-auto">
+              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center shrink-0 text-amber-600">
+                <AlertCircle className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">Bạn có <span className="text-amber-600 font-black">{ongoingExamsCount} bài thi</span> đang chờ hoàn thành!</h3>
+                <p className="text-sm font-medium text-gray-600 mt-0.5">Hãy tiếp tục làm bài để đảm bảo tiến độ học tập nhé.</p>
+              </div>
+            </div>
+            <Button
+              className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold h-11 px-8 shadow-md shadow-amber-900/10 hover:shadow-lg transition-all relative z-10 shrink-0 border-none"
+              onClick={() => {
+                document.getElementById('ongoing-exams')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Xem ngay <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
           {/* Card 1: Upcoming */}
           <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-6 overflow-hidden group hover:shadow-md transition-all duration-300">
@@ -221,7 +245,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <h3 className="text-xl font-bold mb-6 text-gray-900">Kỳ thi đang diễn ra</h3>
+        <h3 id="ongoing-exams" className="text-xl font-bold mb-6 text-gray-900 scroll-mt-24">Kỳ thi đang diễn ra</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {Object.values(EXAMS_DATA).filter((e: any) => e.status === 'ongoing').map((exam: any) => (
             <Card
@@ -246,10 +270,10 @@ export default function Dashboard() {
                   <p className="flex items-center gap-2.5"><Lock className="w-4 h-4 text-gray-400" /> Giám sát AI</p>
                 </div>
                 <Button
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl"
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-base font-bold h-12 shadow-md hover:shadow-lg transition-all"
                   onClick={(e) => { e.stopPropagation(); navigate(`/lobby/${exam.id}`); }}
                 >
-                  Vào phòng chờ <ArrowRight className="w-4 h-4 ml-2" />
+                  Làm bài ngay <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1.5 transition-transform" />
                 </Button>
               </CardContent>
             </Card>
