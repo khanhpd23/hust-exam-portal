@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough, Eye, EyeOff, VideoOff, Video } from 'lucide-react';
+import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough, Eye, EyeOff, VideoOff, Video, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EXAMS_DATA } from '@/lib/mock-data';
 import PageTransition from '@/components/PageTransition';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 function ExamSkeleton() {
   return (
@@ -246,11 +247,142 @@ export default function Exam() {
   const unansweredCount = exam.questions.filter((q: any) => !isQuestionAnswered(q.id)).length;
   const q = exam.questions[currentQuestionIdx];
 
+  const renderInfoAndCamera = () => (
+    <>
+      <div>
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thông tin bài thi</h3>
+        <h2 className="text-xl font-bold text-gray-900 leading-tight mb-2">{exam.title}</h2>
+        <p className="text-sm font-bold text-[#a70015]">{exam.type}</p>
+        <div className="mt-4 space-y-2 text-sm text-gray-600 font-medium">
+          <p>• {exam.format}</p>
+          <p>• Thời gian: {exam.duration / 60} phút</p>
+          <p className="text-amber-600 font-bold">• Có giám sát AI</p>
+        </div>
+      </div>
+
+      <div className="pt-6 border-t border-gray-100">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Camera Giám Sát</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 text-gray-500 hover:text-gray-900"
+            onClick={() => setIsCameraVisible(!isCameraVisible)}
+            title={isCameraVisible ? "Ẩn camera giám sát" : "Hiện camera giám sát"}
+          >
+            {isCameraVisible ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
+            {isCameraVisible ? "Ẩn" : "Hiện"}
+          </Button>
+        </div>
+
+        {isCameraVisible ? (
+          <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-inner ring-2 ring-gray-200">
+            <video
+              ref={setVideoNode}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 w-full h-full object-cover transform -scale-x-100"
+            />
+            <div className="absolute inset-0 border-[4px] border-white/5 flex items-center justify-center pointer-events-none">
+              <div className="w-16 h-16 border border-dashed border-green-400/50 rounded-full"></div>
+            </div>
+            <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              Đang ghi hình
+            </div>
+          </div>
+        ) : (
+          <div className="aspect-video bg-gray-50 rounded-xl flex flex-col items-center justify-center text-gray-400 border border-gray-200">
+            <VideoOff className="w-8 h-8 mb-2 opacity-30" />
+            <span className="text-xs font-semibold">Camera đang ẩn</span>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  const renderNavigator = () => (
+    <>
+      <div className="p-5 border-b border-gray-200 shrink-0 bg-white sticky top-0 z-10">
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Bảng câu hỏi</h3>
+        <p className="text-sm font-medium text-gray-600">
+          Đã làm: <span className="font-bold text-[#a70015]">{Object.keys(answers).filter(k => isQuestionAnswered(Number(k))).length}</span>/{exam.questions.length}
+        </p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-5 pb-24 lg:pb-5">
+        <div className="grid grid-cols-5 gap-2">
+          {exam.questions.map((mq: any, idx: number) => {
+            const isAnswered = isQuestionAnswered(mq.id);
+            const isFlagged = flagged[mq.id];
+            const isActive = currentQuestionIdx === idx;
+
+            let btnClass = "w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all border-2 relative ";
+
+            if (isActive) btnClass += "border-[#a70015] bg-red-50 text-[#a70015] scale-110 shadow-sm z-10";
+            else if (isFlagged) btnClass += "border-amber-400 bg-amber-50 text-amber-700";
+            else if (isAnswered) btnClass += "border-transparent bg-gray-800 text-white";
+            else btnClass += "border-gray-200 bg-white text-gray-500 hover:border-gray-300";
+
+            return (
+              <button key={mq.id} onClick={() => setCurrentQuestionIdx(idx)} className={btnClass} title={mq.type === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}>
+                {mq.id}
+                {mq.type === 'essay' && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 space-y-2 text-xs font-medium text-gray-600 shrink-0">
+          <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-800 rounded-sm"></div> Đã trả lời</div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 bg-white border-2 border-gray-200 rounded-sm"></div> Chưa trả lời</div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border-2 border-amber-400 rounded-sm"></div> Đánh dấu xem lại</div>
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Câu hỏi tự luận</div>
+        </div>
+      </div>
+
+      <div className="p-5 border-t border-gray-200 shrink-0 bg-white shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] sticky bottom-0 z-10 hidden lg:block">
+        <div className="bg-gray-50 rounded-2xl p-4 text-center shadow-inner border border-gray-100 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Thời gian còn lại</p>
+          <div className={`text-4xl font-black tabular-nums tracking-tight transition-opacity ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'} ${!isTimerVisible ? 'opacity-30' : ''}`}>
+            {isTimerVisible ? formatTime(timeLeft) : '- - : - -'}
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          onClick={() => setIsTimerVisible(!isTimerVisible)}
+          className="w-full mb-4 rounded-xl text-gray-500 hover:text-gray-700 bg-white shadow-sm"
+        >
+          {isTimerVisible ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+          {isTimerVisible ? "Ẩn đồng hồ" : "Hiện đồng hồ"}
+        </Button>
+
+        <Button
+          className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
+          onClick={() => setShowSubmitModal(true)}
+        >
+          Nộp bài <Send className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
+
+      <div className="p-5 border-t border-gray-200 shrink-0 bg-white shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] block lg:hidden">
+        <Button
+          className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
+          onClick={() => setShowSubmitModal(true)}
+        >
+          Nộp bài <Send className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <PageTransition skeleton={<ExamSkeleton />}>
       <div className="h-screen flex flex-col bg-[#f8f9fa] overflow-hidden selection:bg-red-100 selection:text-red-900">
-        {/* Exam Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shrink-0 z-10">
+        {/* Mobile Header elements adjustments automatically inherited from tailwind */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 flex flex-wrap justify-between items-center shrink-0 z-10 gap-3">
           <div className="flex items-center gap-6">
             <div className="h-8 w-px bg-gray-200"></div>
             <div className="flex flex-col">
@@ -270,64 +402,15 @@ export default function Exam() {
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar: Info & Camera */}
-          <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 min-h-0 overflow-y-auto p-6 space-y-6">
-            <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thông tin bài thi</h3>
-              <h2 className="text-xl font-bold text-gray-900 leading-tight mb-2">{exam.title}</h2>
-              <p className="text-sm font-bold text-[#a70015]">{exam.type}</p>
-              <div className="mt-4 space-y-2 text-sm text-gray-600 font-medium">
-                <p>• {exam.format}</p>
-                <p>• Thời gian: {exam.duration / 60} phút</p>
-                <p className="text-amber-600 font-bold">• Có giám sát AI</p>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-gray-100">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Camera Giám Sát</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-gray-500 hover:text-gray-900"
-                  onClick={() => setIsCameraVisible(!isCameraVisible)}
-                  title={isCameraVisible ? "Ẩn camera giám sát" : "Hiện camera giám sát"}
-                >
-                  {isCameraVisible ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
-                  {isCameraVisible ? "Ẩn" : "Hiện"}
-                </Button>
-              </div>
-
-              {isCameraVisible ? (
-                <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-inner ring-2 ring-gray-200">
-                  <video
-                    ref={setVideoNode}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="absolute inset-0 w-full h-full object-cover transform -scale-x-100"
-                  />
-                  <div className="absolute inset-0 border-[4px] border-white/5 flex items-center justify-center pointer-events-none">
-                    <div className="w-16 h-16 border border-dashed border-green-400/50 rounded-full"></div>
-                  </div>
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    Đang ghi hình
-                  </div>
-                </div>
-              ) : (
-                <div className="aspect-video bg-gray-50 rounded-xl flex flex-col items-center justify-center text-gray-400 border border-gray-200">
-                  <VideoOff className="w-8 h-8 mb-2 opacity-30" />
-                  <span className="text-xs font-semibold">Camera đang ẩn</span>
-                </div>
-              )}
-            </div>
+          {/* Left Sidebar: Info & Camera (Desktop) */}
+          <aside className="hidden lg:flex w-72 bg-white border-r border-gray-200 flex-col shrink-0 min-h-0 overflow-y-auto p-6 space-y-6">
+            {renderInfoAndCamera()}
           </aside>
 
           {/* Center: Question Area */}
-          <main className="flex-1 overflow-y-auto p-8 md:p-12 relative bg-white">
+          <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 relative bg-white pb-32 lg:pb-12">
             <div className="max-w-4xl mx-auto">
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex flex-wrap gap-4 justify-between items-center mb-8">
                 <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">
                   {q.type === 'essay' ? 'Phần Tự Luận' : 'Phần Trắc Nghiệm'} - Câu {q.id}
                 </span>
@@ -338,11 +421,11 @@ export default function Exam() {
                   className={`rounded-full ${flagged[q.id] ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' : 'text-gray-500'}`}
                 >
                   <Bookmark className={`w-4 h-4 mr-2 ${flagged[q.id] ? 'fill-current' : ''}`} />
-                  {flagged[q.id] ? 'Đã đánh dấu' : 'Đánh dấu xem lại'}
+                  {flagged[q.id] ? 'Đã đánh dấu' : 'Đánh dấu xem'}
                 </Button>
               </div>
 
-              <h2 className="text-xl font-bold text-gray-900 leading-relaxed mb-10">
+              <h2 className="text-xl font-bold text-gray-900 leading-relaxed mb-8">
                 {q.text}
               </h2>
 
@@ -353,7 +436,7 @@ export default function Exam() {
                     return (
                       <label
                         key={oIdx}
-                        className={`flex items-start p-5 rounded-xl cursor-pointer transition-all border-2 ${isSelected
+                        className={`flex items-start p-4 md:p-5 rounded-xl cursor-pointer transition-all border-2 ${isSelected
                           ? 'border-[#a70015] bg-red-50/50'
                           : 'border-transparent bg-gray-50 shadow-sm hover:border-gray-200 hover:bg-gray-100'
                           }`}
@@ -368,7 +451,7 @@ export default function Exam() {
                         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-4 transition-colors ${isSelected ? 'border-[#a70015]' : 'border-gray-300 bg-white'}`}>
                           {isSelected && <div className="w-2.5 h-2.5 bg-[#a70015] rounded-full"></div>}
                         </div>
-                        <span className={`text-lg ${isSelected ? 'font-semibold text-[#a70015]' : 'text-gray-700'}`}>
+                        <span className={`text-base md:text-lg ${isSelected ? 'font-semibold text-[#a70015]' : 'text-gray-700'}`}>
                           <span className="font-bold mr-2">{String.fromCharCode(65 + oIdx)}.</span> {opt}
                         </span>
                       </label>
@@ -385,91 +468,71 @@ export default function Exam() {
                 </div>
               )}
 
-              <div className="mt-16 flex justify-between items-center pt-8 border-t border-gray-200">
+              <div className="mt-12 flex justify-between items-center pt-8 border-t border-gray-200">
                 <Button
                   variant="outline"
                   onClick={() => setCurrentQuestionIdx(prev => Math.max(0, prev - 1))}
                   disabled={currentQuestionIdx === 0}
-                  className="rounded-xl"
+                  className="rounded-xl w-full sm:w-auto mb-2 sm:mb-0 mr-2"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" /> Câu trước
+                  <ArrowLeft className="w-4 h-4 mr-2 hidden sm:inline" /> Câu trước
                 </Button>
                 <Button
                   onClick={() => setCurrentQuestionIdx(prev => Math.min(exam.questions.length - 1, prev + 1))}
                   disabled={currentQuestionIdx === exam.questions.length - 1}
-                  className="rounded-xl bg-gray-900 text-white hover:bg-gray-800"
+                  className="rounded-xl bg-gray-900 text-white hover:bg-gray-800 w-full sm:w-auto ml-2"
                 >
-                  Câu tiếp theo <ArrowRight className="w-4 h-4 ml-2" />
+                  Câu tiếp <ArrowRight className="w-4 h-4 ml-2 hidden sm:inline" />
                 </Button>
               </div>
             </div>
           </main>
 
-          {/* Right Sidebar: Navigator, Timer & Submit */}
-          <aside className="w-80 bg-gray-50 border-l border-gray-200 flex flex-col shrink-0 min-h-0">
-            <div className="p-5 border-b border-gray-200 shrink-0 bg-white">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Bảng câu hỏi</h3>
-              <p className="text-sm font-medium text-gray-600">
-                Đã làm: <span className="font-bold text-[#a70015]">{Object.keys(answers).filter(k => isQuestionAnswered(Number(k))).length}</span>/{exam.questions.length}
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-5">
-              <div className="grid grid-cols-5 gap-2">
-                {exam.questions.map((mq: any, idx: number) => {
-                  const isAnswered = isQuestionAnswered(mq.id);
-                  const isFlagged = flagged[mq.id];
-                  const isActive = currentQuestionIdx === idx;
-
-                  let btnClass = "w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all border-2 relative ";
-
-                  if (isActive) btnClass += "border-[#a70015] bg-red-50 text-[#a70015] scale-110 shadow-sm z-10";
-                  else if (isFlagged) btnClass += "border-amber-400 bg-amber-50 text-amber-700";
-                  else if (isAnswered) btnClass += "border-transparent bg-gray-800 text-white";
-                  else btnClass += "border-gray-200 bg-white text-gray-500 hover:border-gray-300";
-
-                  return (
-                    <button key={mq.id} onClick={() => setCurrentQuestionIdx(idx)} className={btnClass} title={mq.type === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}>
-                      {mq.id}
-                      {mq.type === 'essay' && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 space-y-2 text-xs font-medium text-gray-600 shrink-0">
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-800 rounded-sm"></div> Đã trả lời</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-white border-2 border-gray-200 rounded-sm"></div> Chưa trả lời</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border-2 border-amber-400 rounded-sm"></div> Đánh dấu xem lại</div>
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Câu hỏi tự luận</div>
-              </div>
-            </div>
-
-            <div className="p-5 border-t border-gray-200 shrink-0 bg-white shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-              <div className="bg-gray-50 rounded-2xl p-4 text-center shadow-inner border border-gray-100 mb-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Thời gian còn lại</p>
-                <div className={`text-4xl font-black tabular-nums tracking-tight transition-opacity ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'} ${!isTimerVisible ? 'opacity-30' : ''}`}>
-                  {isTimerVisible ? formatTime(timeLeft) : '- - : - -'}
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                onClick={() => setIsTimerVisible(!isTimerVisible)}
-                className="w-full mb-4 rounded-xl text-gray-500 hover:text-gray-700 bg-white shadow-sm"
-              >
-                {isTimerVisible ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-                {isTimerVisible ? "Ẩn đồng hồ đếm ngược" : "Hiện đồng hồ đếm ngược"}
-              </Button>
-
-              <Button
-                className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
-                onClick={() => setShowSubmitModal(true)}
-              >
-                Nộp bài <Send className="w-5 h-5 ml-2" />
-              </Button>
-            </div>
+          {/* Right Sidebar: Navigator, Timer & Submit (Desktop) */}
+          <aside className="hidden lg:flex w-80 bg-gray-50 border-l border-gray-200 flex-col shrink-0 min-h-0 relative">
+            {renderNavigator()}
           </aside>
+        </div>
+
+        {/* Mobile Bottom Navigation Bar (Phone Only) */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 p-3 sm:p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between gap-3 max-w-xl mx-auto">
+            {/* Info & Camera Sheet Trigger */}
+            <Sheet>
+              <SheetTrigger render={
+                <Button variant="outline" size="icon" className="shrink-0 rounded-xl h-12 w-12" title="Thông tin & Camera">
+                  <Menu className="w-5 h-5 text-gray-600" />
+                </Button>
+              } />
+              <SheetContent side="left" className="w-[85vw] max-w-[340px] p-0 overflow-y-auto">
+                <div className="min-h-full bg-white flex flex-col p-6 space-y-6">
+                  {renderInfoAndCamera()}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Timer Toggle Area */}
+            <div className="flex-1 bg-gray-50 rounded-xl p-2 h-12 text-center shadow-inner border border-gray-100 flex items-center justify-between px-4 min-w-[150px]">
+              <div className={`text-xl font-black tabular-nums tracking-tight transition-opacity ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'} ${!isTimerVisible ? 'opacity-30' : ''}`}>
+                {isTimerVisible ? formatTime(timeLeft) : '- - : - -'}
+              </div>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setIsTimerVisible(!isTimerVisible)}>
+                {isTimerVisible ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+              </Button>
+            </div>
+
+            {/* Navigation Sheet Trigger */}
+            <Sheet>
+              <SheetTrigger render={
+                <Button variant="outline" size="icon" className="shrink-0 rounded-xl bg-gray-900 border-gray-900 hover:bg-gray-800 text-white h-12 w-12" title="Bảng câu hỏi">
+                  <List className="w-5 h-5" />
+                </Button>
+              } />
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] p-0 flex flex-col bg-gray-50">
+                {renderNavigator()}
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Submit Confirmation Modal */}
