@@ -153,7 +153,7 @@ export default function Lobby() {
 
             <Card className="bg-blue-50/50 border-blue-100 shadow-none">
               <CardContent className="p-6">
-                <h3 className="font-bold text-blue-900 mb-4 text-sm uppercase tracking-wider">System Check</h3>
+                <h3 className="font-bold text-blue-900 mb-4 text-sm uppercase tracking-wider">Kiểm tra hệ thống</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                     <Video className={`w-5 h-5 ${cameraActive ? 'text-green-500' : 'text-red-500'}`} />
@@ -163,7 +163,7 @@ export default function Lobby() {
                   </div>
                   <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                     <Wifi className="w-5 h-5 text-green-500" />
-                    <span className="text-sm font-semibold">Network OK</span>
+                    <span className="text-sm font-semibold">Đường truyền OK</span>
                   </div>
                 </div>
               </CardContent>
@@ -187,9 +187,20 @@ export default function Lobby() {
             <Card className="shadow-sm">
               <CardContent className="p-8 text-center">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thời gian bắt đầu</p>
-                <div className="text-5xl font-black text-gray-900 mb-8 tabular-nums">
+                <div className="text-5xl font-black text-gray-900 mb-6 tabular-nums">
                   00:{countdown.toString().padStart(2, '0')}
                 </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex items-start gap-3 text-left">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-amber-900 mb-1">Lưu ý quan trọng</p>
+                    <p className="text-sm text-amber-800 leading-relaxed">
+                      Bài thi sẽ <span className="font-bold underline">tự động được nộp</span> ngay khi hết giờ làm bài. Thí sinh cần phân bổ thời gian hợp lý để hoàn thành các câu hỏi.
+                    </p>
+                  </div>
+                </div>
+
                 <Button
                   className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => navigate(`/exam/${exam.id}`)}
