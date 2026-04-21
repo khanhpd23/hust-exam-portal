@@ -144,6 +144,52 @@
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
   }
+  .prose h1 {
+    font-size: 2.25rem;
+    font-weight: 900;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    color: #111827;
+  }
+  .prose h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+  }
+  .prose h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #374151;
+  }
+  .prose h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0.85rem;
+    margin-bottom: 0.4rem;
+    color: #4b5563;
+  }
+  .prose h5 {
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-top: 0.75rem;
+    margin-bottom: 0.35rem;
+    color: #6b7280;
+  }
+  .prose blockquote {
+    border-left: 4px solid #f3f4f6;
+    padding-left: 1.25rem;
+    font-style: italic;
+    margin: 1.5rem 0;
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
 }
 
 [contenteditable][data-placeholder]:empty:before {

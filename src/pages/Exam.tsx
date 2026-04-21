@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info, Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Strikethrough, Eye, EyeOff, VideoOff, Video, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EXAMS_DATA } from '@/lib/mock-data';
@@ -8,6 +7,25 @@ import PageTransition from '@/components/PageTransition';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import {
+  Cloud, Bookmark, ArrowLeft, ArrowRight, Send, AlertCircle, CheckCircle2, Info,
+  Bold, Italic, Underline, FileText, AlignLeft, AlignCenter, AlignRight,
+  List, ListOrdered, Strikethrough, Eye, EyeOff, VideoOff, Video, Menu,
+  Type, Palette, Highlighter, Eraser, Quote, ChevronDown, Heading1, Heading2, Heading3
+} from 'lucide-react';
 
 function ExamSkeleton() {
   return (
@@ -63,7 +81,10 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
   }, [id]);
 
   const updateWordCount = (html: string) => {
-    const text = html.replace(/<[^>]*>?/gm, '').trim();
+    // Replace block tags with space to ensure words in lists/divs are separated
+    const text = html.replace(/<[^>]*>?/gm, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const words = text ? text.split(/\s+/).length : 0;
     setWordCount(words);
   };
@@ -79,6 +100,12 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
       justifyRight: document.queryCommandState('justifyRight'),
       insertUnorderedList: document.queryCommandState('insertUnorderedList'),
       insertOrderedList: document.queryCommandState('insertOrderedList'),
+      h1: document.queryCommandValue('formatBlock') === 'h1',
+      h2: document.queryCommandValue('formatBlock') === 'h2',
+      h3: document.queryCommandValue('formatBlock') === 'h3',
+      h4: document.queryCommandValue('formatBlock') === 'h4',
+      h5: document.queryCommandValue('formatBlock') === 'h5',
+      blockquote: document.queryCommandValue('formatBlock') === 'blockquote',
     });
   };
 
@@ -91,6 +118,22 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      // Only breakout of blockquote if we are NOT currently in a list (bullet or numbered)
+      // This allows lists inside quotes to continue correctly without resetting numbers.
+      if (document.queryCommandValue('formatBlock') === 'blockquote' && 
+          !document.queryCommandState('insertUnorderedList') && 
+          !document.queryCommandState('insertOrderedList')) {
+        e.preventDefault();
+        // Insert a new paragraph and force it to be 'p' (Normal)
+        document.execCommand('insertParagraph');
+        document.execCommand('formatBlock', false, 'p');
+        handleInput();
+      }
+    }
+  };
+
   const handleKeyUp = () => {
     checkFormats();
   };
@@ -99,35 +142,233 @@ const RichTextEditor = ({ value, onChange, id }: { value: string, onChange: (val
     checkFormats();
   };
 
-  const format = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
+  const format = (command: string, val?: string) => {
+    if (command === 'formatBlock') {
+      // 1. Flatten the structure first by reverting to a standard paragraph
+      // This prevents nested structures like <blockquote><h1>...</h1></blockquote>
+      document.execCommand('formatBlock', false, 'p');
+
+      if (val !== 'p') {
+        // 2. Wrap the flattened text in the new block tag
+        document.execCommand(command, false, val);
+      } else {
+        // Special cleanup for "Normal Text"
+        document.execCommand('removeFormat', false, undefined);
+        document.execCommand('formatBlock', false, 'p');
+      }
+    } else {
+      document.execCommand(command, false, val);
+    }
+
     editorRef.current?.focus();
     handleInput();
   };
 
+  const handleClearFormatting = () => {
+    // 1. Break out of Lists
+    // Execute multiple times to handle nested or stubborn lists
+    while (document.queryCommandState('insertUnorderedList')) {
+      document.execCommand('insertUnorderedList', false, undefined);
+    }
+    while (document.queryCommandState('insertOrderedList')) {
+      document.execCommand('insertOrderedList', false, undefined);
+    }
+
+    // 2. Break out of blockquotes and headers
+    document.execCommand('formatBlock', false, 'p');
+    document.execCommand('outdent', false, undefined); // In case it's treated as indentation
+
+    // 3. Remove inline styles
+    document.execCommand('removeFormat', false, undefined);
+
+    // 4. Reset colors and background
+    document.execCommand('foreColor', false, '#1f2937');
+    document.execCommand('hiliteColor', false, 'transparent');
+
+    // 5. Final pass for Normal block style
+    document.execCommand('formatBlock', false, 'p');
+
+    editorRef.current?.focus();
+    handleInput();
+  };
+
+  const textColors = [
+    { name: 'Mặc định', color: '#1f2937' },
+    { name: 'Đỏ', color: '#ef4444' },
+    { name: 'Xanh dương', color: '#3b82f6' },
+    { name: 'Xanh lá', color: '#22c55e' },
+    { name: 'Cam', color: '#f59e0b' },
+    { name: 'Tím', color: '#a855f7' },
+    { name: 'Xám', color: '#6b7280' },
+  ];
+
+  const highlightColors = [
+    { name: 'Không màu', color: 'transparent' },
+    { name: 'Vàng', color: '#fef08a' },
+    { name: 'Xanh lá nhạt', color: '#bbf7d0' },
+    { name: 'Xanh dương nhạt', color: '#bfdbfe' },
+    { name: 'Đỏ nhạt', color: '#fecaca' },
+    { name: 'Xám nhạt', color: '#f3f4f6' },
+  ];
+
+  const getCurrentStyle = () => {
+    if (activeFormats.h1) return 'Title';
+    if (activeFormats.h2) return 'Subtitle';
+    if (activeFormats.h3) return 'Heading 1';
+    if (activeFormats.h4) return 'Heading 2';
+    if (activeFormats.h5) return 'Heading 3';
+    if (activeFormats.blockquote) return 'Quote';
+    return 'Normal';
+  };
+
+  const getStyleIcon = () => {
+    if (activeFormats.h1 || activeFormats.h2 || activeFormats.h3 || activeFormats.h4 || activeFormats.h5) return <Type className="w-4 h-4" />;
+    if (activeFormats.blockquote) return <Quote className="w-4 h-4" />;
+    return <Type className="w-4 h-4" />;
+  };
+
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white flex flex-col h-full min-h-[400px] shadow-sm focus-within:ring-2 focus-within:ring-red-500/20 focus-within:border-red-300 transition-all">
-      <div className="bg-gray-50 border-b border-gray-200 p-2 flex flex-wrap gap-1">
-        <button onClick={() => format('bold')} className={`p-2 rounded transition-colors ${activeFormats.bold ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="In đậm"><Bold className="w-4 h-4" /></button>
-        <button onClick={() => format('italic')} className={`p-2 rounded transition-colors ${activeFormats.italic ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="In nghiêng"><Italic className="w-4 h-4" /></button>
-        <button onClick={() => format('underline')} className={`p-2 rounded transition-colors ${activeFormats.underline ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Gạch chân"><Underline className="w-4 h-4" /></button>
-        <button onClick={() => format('strikeThrough')} className={`p-2 rounded transition-colors ${activeFormats.strikeThrough ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Gạch ngang"><Strikethrough className="w-4 h-4" /></button>
-        <div className="w-px h-6 bg-gray-300 mx-1 my-auto"></div>
-        <button onClick={() => format('justifyLeft')} className={`p-2 rounded transition-colors ${activeFormats.justifyLeft ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Căn trái"><AlignLeft className="w-4 h-4" /></button>
-        <button onClick={() => format('justifyCenter')} className={`p-2 rounded transition-colors ${activeFormats.justifyCenter ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Căn giữa"><AlignCenter className="w-4 h-4" /></button>
-        <button onClick={() => format('justifyRight')} className={`p-2 rounded transition-colors ${activeFormats.justifyRight ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Căn phải"><AlignRight className="w-4 h-4" /></button>
-        <div className="w-px h-6 bg-gray-300 mx-1 my-auto"></div>
-        <button onClick={() => format('insertUnorderedList')} className={`p-2 rounded transition-colors ${activeFormats.insertUnorderedList ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Danh sách không thứ tự"><List className="w-4 h-4" /></button>
-        <button onClick={() => format('insertOrderedList')} className={`p-2 rounded transition-colors ${activeFormats.insertOrderedList ? 'bg-gray-300 text-gray-900' : 'hover:bg-gray-200 text-gray-700'}`} title="Danh sách có thứ tự"><ListOrdered className="w-4 h-4" /></button>
+    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white flex flex-col h-full min-h-[450px] shadow-sm focus-within:ring-2 focus-within:ring-red-500/20 focus-within:border-red-300 transition-all">
+      <div className="bg-gray-50 border-b border-gray-200 p-2 flex flex-wrap gap-1 items-center">
+        {/* Style Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant="ghost" size="sm" className={`h-8 gap-1 px-2 text-xs font-semibold ${getCurrentStyle() !== 'Normal' ? 'bg-gray-200 text-gray-900 border-gray-300' : ''}`}>
+              {getStyleIcon()}
+              <span className="hidden sm:inline">{getCurrentStyle()}</span>
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Main Styles</div>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'h1')} className={`font-black text-xl py-2 ${activeFormats.h1 ? 'bg-gray-100' : ''}`}>Title</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'h2')} className={`font-bold text-lg py-2 ${activeFormats.h2 ? 'bg-gray-100' : ''}`}>Subtitle</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Headings</div>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'h3')} className={`font-bold text-base ${activeFormats.h3 ? 'bg-gray-100' : ''}`}>Heading 1</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'h4')} className={`font-semibold text-sm ${activeFormats.h4 ? 'bg-gray-100' : ''}`}>Heading 2</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'h5')} className={`font-medium text-xs ${activeFormats.h5 ? 'bg-gray-100' : ''}`}>Heading 3</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => format('formatBlock', 'blockquote')} className={`italic border-l-2 border-gray-300 pl-2 ${activeFormats.blockquote ? 'bg-gray-100' : ''}`}>Quote</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => format('formatBlock', 'p')} className={getCurrentStyle() === 'Normal' ? 'bg-gray-100' : ''}>Normal Text</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Separator orientation="vertical" className="mx-1 h-6" />
+
+        {/* Basic Formatting */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-8 w-8 transition-colors ${activeFormats.bold ? 'bg-gray-200 text-gray-900 shadow-inner border border-gray-300' : ''}`}
+          onClick={() => format('bold')}
+          title="In đậm (Bold)"
+        >
+          <Bold className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-8 w-8 transition-colors ${activeFormats.italic ? 'bg-gray-200 text-gray-900 shadow-inner border border-gray-300' : ''}`}
+          onClick={() => format('italic')}
+          title="In nghiêng (Italic)"
+        >
+          <Italic className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-8 w-8 transition-colors ${activeFormats.underline ? 'bg-gray-200 text-gray-900 shadow-inner border border-gray-300' : ''}`}
+          onClick={() => format('underline')}
+          title="Gạch chân (Underline)"
+        >
+          <Underline className="w-4 h-4" />
+        </Button>
+
+        <Separator orientation="vertical" className="mx-1 h-6" />
+
+        {/* Alignment */}
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => format('justifyLeft')} title="Căn trái"><AlignLeft className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => format('justifyCenter')} title="Căn giữa"><AlignCenter className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => format('justifyRight')} title="Căn phải"><AlignRight className="w-4 h-4" /></Button>
+
+        <Separator orientation="vertical" className="mx-1 h-6" />
+
+        {/* Lists */}
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => format('insertUnorderedList')} title="Danh sách điểm"><List className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => format('insertOrderedList')} title="Danh sách số"><ListOrdered className="w-4 h-4" /></Button>
+
+        <Separator orientation="vertical" className="mx-1 h-6" />
+
+        {/* Color Popovers */}
+        <Popover>
+          <PopoverTrigger>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Màu chữ">
+              <Palette className="w-4 h-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {textColors.map((c) => (
+                <button
+                  key={c.color}
+                  className="w-6 h-6 rounded-md border border-gray-200"
+                  style={{ backgroundColor: c.color }}
+                  onClick={() => format('foreColor', c.color)}
+                  title={c.name}
+                />
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Màu nền (Highlight)">
+              <Highlighter className="w-4 h-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2" align="start">
+            <div className="grid grid-cols-4 gap-1">
+              {highlightColors.map((c) => (
+                <button
+                  key={c.name}
+                  className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center overflow-hidden"
+                  style={{ backgroundColor: c.color }}
+                  onClick={() => format('hiliteColor', c.color)}
+                  title={c.name}
+                >
+                  {c.color === 'transparent' && <Eraser className="w-3 h-3 text-gray-400" />}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Separator orientation="vertical" className="mx-1 h-6" />
+
+        {/* Clear Formatting */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={handleClearFormatting}
+          title="Xóa định dạng"
+        >
+          <Eraser className="w-4 h-4" />
+        </Button>
       </div>
       <div
         ref={editorRef}
         contentEditable
+        spellCheck="false"
         onInput={handleInput}
         onKeyUp={handleKeyUp}
         onMouseUp={handleMouseUp}
-        className="p-6 flex-1 outline-none overflow-y-auto prose max-w-none text-gray-800 leading-relaxed"
-        style={{ minHeight: '300px' }}
+        onKeyDown={handleKeyDown}
+        onFocus={checkFormats}
+        className="p-6 flex-1 outline-none overflow-y-auto prose max-w-none text-gray-800 leading-relaxed min-h-[350px]"
+        style={{ fontFamily: 'Arial, sans-serif' }}
         data-placeholder="Nhập câu trả lời của bạn vào đây..."
       />
       <div className="bg-gray-50 border-t border-gray-200 p-3 px-5 text-xs font-bold text-gray-500 flex justify-between items-center">
