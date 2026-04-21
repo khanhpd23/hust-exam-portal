@@ -33,8 +33,8 @@ export default function DashboardLayout() {
         <Link to="/dashboard" className="h-20 flex items-center px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
           <img src="/images/logo.png" alt="HUST" className="w-10 h-14 mr-3 object-contain" />
           <div className="flex flex-col">
-            <span className="font-medium text-[10px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
-            <span className="font-bold text-[10px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
+            <span className="font-medium text-[12px] leading-tight text-[#a70015]">ĐẠI HỌC BÁCH KHOA HÀ NỘI</span>
+            <span className="font-bold text-[12px] leading-tight text-[#a70015]">KHOA KHOA HỌC &<br />CÔNG NGHỆ GIÁO DỤC</span>
           </div>
         </Link>
 
