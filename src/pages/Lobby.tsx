@@ -31,7 +31,6 @@ export default function Lobby() {
   const exam = EXAMS_DATA[examId || ''] || EXAMS_DATA['ed3280-mid'];
 
   const [videoNode, setVideoNode] = useState<HTMLVideoElement | null>(null);
-  const [countdown, setCountdown] = useState(2);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -93,12 +92,7 @@ export default function Lobby() {
     };
   }, [videoNode]);
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+
 
   return (
     <PageTransition skeleton={<LobbySkeleton />}>
@@ -186,11 +180,6 @@ export default function Lobby() {
 
             <Card className="shadow-sm">
               <CardContent className="p-8 text-center">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thời gian bắt đầu</p>
-                <div className="text-5xl font-black text-gray-900 mb-6 tabular-nums">
-                  00:{countdown.toString().padStart(2, '0')}
-                </div>
-
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex items-start gap-3 text-left">
                   <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                   <div>
@@ -202,11 +191,10 @@ export default function Lobby() {
                 </div>
 
                 <Button
-                  className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20"
                   onClick={() => navigate(`/exam/${exam.id}`)}
-                  disabled={countdown > 0}
                 >
-                  {countdown > 0 ? `Vào thi sau ${countdown}s` : 'Bắt đầu làm bài'}
+                  Bắt đầu làm bài
                 </Button>
               </CardContent>
             </Card>
