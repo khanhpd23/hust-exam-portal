@@ -30,7 +30,9 @@ export default function History() {
   const [filterMode, setFilterMode] = useState('all');
 
   const filteredData = HISTORY_DATA.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterMode === 'all' || item.status.toLowerCase().includes(filterMode.toLowerCase());
     return matchesSearch && matchesFilter;
   });
@@ -39,7 +41,6 @@ export default function History() {
     <PageTransition skeleton={<HistorySkeleton />}>
       <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
         <div className="mb-10">
-          <span className="text-[#a70015] font-bold tracking-widest text-xs uppercase mb-2 block">Student Workspace</span>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Lịch sử thi</h1>
           <p className="text-gray-500 mt-2">Xem lại các bài thi bạn đã tham gia và tiến độ của từng kỳ thi.</p>
         </div>
@@ -71,7 +72,8 @@ export default function History() {
             <Table>
               <TableHeader className="bg-gray-50">
                 <TableRow className="hover:bg-transparent border-gray-100">
-                  <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs px-6">Học phần</TableHead>
+                  <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs px-6">Mã học phần</TableHead>
+                  <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs">Học phần</TableHead>
                   <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs">Loại bài thi</TableHead>
                   <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs">Thời gian thi</TableHead>
                   <TableHead className="py-5 font-bold text-gray-500 uppercase tracking-wider text-xs text-right">Trạng thái</TableHead>
@@ -81,7 +83,7 @@ export default function History() {
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-40 text-center text-gray-500">
+                    <TableCell colSpan={6} className="h-40 text-center text-gray-500">
                       Không tìm thấy bài thi nào phù hợp với bộ lọc.
                     </TableCell>
                   </TableRow>
@@ -89,6 +91,9 @@ export default function History() {
                   filteredData.map((item) => (
                     <TableRow key={item.id} className="border-gray-50 hover:bg-gray-50 transition-colors">
                       <TableCell className="py-5 px-6">
+                        <span className="font-bold text-gray-700">{item.code}</span>
+                      </TableCell>
+                      <TableCell className="py-5">
                         <span className="font-bold text-gray-900 line-clamp-1">{item.title}</span>
                       </TableCell>
                       <TableCell className="py-5">
