@@ -7,7 +7,7 @@ interface PageTransitionProps {
   delay?: number;
 }
 
-export default function PageTransition({ children, skeleton, delay = 1500 }: PageTransitionProps) {
+export default function PageTransition({ children, skeleton, delay = 400 }: PageTransitionProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
