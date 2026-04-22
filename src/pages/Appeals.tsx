@@ -145,9 +145,6 @@ export default function Appeals() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
-            <span className="text-[#a70015] font-bold tracking-widest text-sm uppercase block mb-2">
-              Student Workspace
-            </span>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Phúc khảo</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Quản lý và theo dõi các yêu cầu phúc khảo điểm thi của bạn.
