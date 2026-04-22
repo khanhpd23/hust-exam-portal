@@ -88,15 +88,15 @@ export const EXAMS_DATA: Record<string, any> = {
 };
 
 export const HISTORY_DATA = [
-  { id: 'h1', title: 'Tâm lý học giáo dục', type: 'Thi cuối kỳ 1', date: '31/01/2026', score: 8, status: 'Đã hoàn thành' },
-  { id: 'h2', title: 'Tâm lý học ứng dụng', type: 'Thi cuối kỳ 1', date: '15/01/2026', score: 9, status: 'Đã hoàn thành' },
-  { id: 'h3', title: 'Tâm lý học ứng dụng', type: 'Thi giữa kỳ 1', date: '20/11/2025', score: 9.5, status: 'Đã hoàn thành' },
+  { id: 'h1', code: 'ED1010', title: 'Tâm lý học giáo dục', type: 'Thi cuối kỳ 1', date: '31/01/2026', score: 8, status: 'Đã hoàn thành' },
+  { id: 'h2', code: 'ED3280', title: 'Tâm lý học ứng dụng', type: 'Thi cuối kỳ 1', date: '15/01/2026', score: 9, status: 'Đã hoàn thành' },
+  { id: 'h3', code: 'ED3280', title: 'Tâm lý học ứng dụng', type: 'Thi giữa kỳ 1', date: '20/11/2025', score: 9.5, status: 'Đã hoàn thành' },
 ];
 
 export const GRADES_DATA = [
-  { id: 'g1', subject: 'Tâm lý học giáo dục', credits: 3, midterm: 10.0, final: 8.0, total: 8.5, letter: 'A' },
-  { id: 'g2', subject: 'Tâm lý học ứng dụng', credits: 2, midterm: 10, final: 9.5, total: 10, letter: 'A+' },
-  { id: 'g3', subject: 'E-learning', credits: 3, midterm: 9.0, final: 9.0, total: 9.0, letter: 'A' },
+  { id: 'g1', code: 'ED1010', subject: 'Tâm lý học giáo dục', credits: 3, midterm: 10.0, final: 8.0, total: 8.5, letter: 'A' },
+  { id: 'g2', code: 'ED3280', subject: 'Tâm lý học ứng dụng', credits: 2, midterm: 10, final: 9.5, total: 10, letter: 'A+' },
+  { id: 'g3', code: 'ED3340', subject: 'E-learning', credits: 3, midterm: 9.0, final: 9.0, total: 9.0, letter: 'A' },
 ];
 
 export const APPEALS_DATA = [
