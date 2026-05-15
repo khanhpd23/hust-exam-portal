@@ -844,11 +844,19 @@ export default function Exam() {
       </div>
 
       <div className="p-5 border-t border-gray-200 shrink-0 bg-white sticky bottom-0 z-10">
-        <div className="bg-gray-50 rounded-2xl p-4 text-center shadow-inner border border-gray-100 mb-4">
+        <div className="bg-gray-50 rounded-2xl p-4 text-center shadow-inner border border-gray-100 mb-4 relative">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Thời gian còn lại</p>
-          <div className={`text-4xl font-black tabular-nums tracking-tight ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'}`}>
+          <div className={`text-4xl font-black tabular-nums tracking-tight transition-opacity ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-[#a70015]'} ${!isTimerVisible ? 'opacity-30' : ''}`}>
             {isTimerVisible ? formatTime(timeLeft) : '- - : - -'}
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 absolute right-2 top-10"
+            onClick={() => setIsTimerVisible(!isTimerVisible)}
+          >
+            {isTimerVisible ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+          </Button>
         </div>
         <Button className="w-full py-6 text-lg bg-[#a70015] hover:bg-[#8a0011] rounded-xl shadow-lg shadow-red-900/20" onClick={() => setShowSubmitModal(true)}>
           Nộp bài <Send className="w-5 h-5 ml-2" />
